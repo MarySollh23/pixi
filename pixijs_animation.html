@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixiJS 2D Animation</title>
+    <!-- Incluir PixiJS desde el CDN -->
+    <script src="https://pixijs.download/release/pixi.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script>
+        // Crear la aplicación de PixiJS
+        const app = new PIXI.Application({ 
+            width: 800, 
+            height: 600, 
+            backgroundColor: 0xAAAAAA 
+        });
+        document.body.appendChild(app.view);
+
+        // Crear un sprite (imagen) y agregarlo a la escena
+        const sprite = PIXI.Sprite.from('https://pixijs.io/examples/examples/assets/bunny.png');
+        sprite.x = app.screen.width / 2;
+        sprite.y = app.screen.height / 2;
+        sprite.anchor.set(0.5); // Centrar el sprite
+        app.stage.addChild(sprite);
+
+        // Hacer que el sprite sea interactivo (por ejemplo, cambiar color con clic)
+        sprite.interactive = true;
+        sprite.buttonMode = true; // Cambia el cursor cuando se pasa sobre el sprite
+        sprite.on('pointerdown', () => {
+            sprite.tint = Math.random() * 0xFFFFFF; // Cambiar el color del sprite al azar
+        });
+
+        // Evento para mover el sprite con el ratón y aplicar rotación y escala
+        app.view.addEventListener('mousemove', (e) => {
+            let mouseX = e.clientX;
+            let mouseY = e.clientY;
+
+            // Rotar el sprite hacia el ratón
+            sprite.rotation = Math.atan2(mouseY - sprite.y, mouseX - sprite.x);
+
+            // Escalar el sprite en función de la distancia al ratón
+            let distance = Math.sqrt(Math.pow(mouseX - sprite.x, 2) + Math.pow(mouseY - sprite.y, 2));
+            sprite.scale.set(1 + distance / 1000); // Aumentar tamaño con la distancia
+
+            // Ajustar la transparencia del sprite dependiendo de la distancia
+            sprite.alpha = Math.max(0.1, 1 - distance / 500); // Hacerlo más transparente a medida que te alejas
+        });
+
+        // Crear una cuerda (rope) que sigue al ratón
+        const points = [];
+        for (let i = 0; i < 10; i++) {
+            points.push(new PIXI.Point(200 + i * 20, 100)); // Inicializar puntos para la cuerda
+        }
+        const rope = new PIXI.Rope(PIXI.Texture.from('https://pixijs.io/examples/examples/assets/rope.png'), points);
+        app.stage.addChild(rope);
+
+        // Actualizar la cuerda con el movimiento del ratón
+        app.view.addEventListener('mousemove', (e) => {
+            let mouseX = e.clientX;
+            let mouseY = e.clientY;
+
+            // Hacer que la cuerda siga al ratón
+            points[0].x = mouseX;
+            points[0].y = mouseY;
+
+            // Actualizar la geometría de la cuerda
+            rope.geometry.invalidate();
+        });
+    </script>
+</body>
+</html>
